@@ -67,4 +67,4 @@ def login():
         return {'status':'You are logged-in.'}
     return {'error':'Password mismatched.'}
 
-app.run(debug=True)
+app.run()
