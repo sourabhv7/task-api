@@ -1,6 +1,7 @@
 from flask import Flask, request, session
 from flask_pymongo import PyMongo
 from flask_bcrypt import Bcrypt
+import json
 
 uri = "mongodb://localhost:27017/task-api"
 
@@ -13,10 +14,21 @@ bcrypt = Bcrypt(app)
 
 @app.route("/register",methods = ['POST','GET'])
 def register():
+    #If request sent by parameters/arguments.
     email = request.args.get('email')
     password = request.args.get('password')
-    print(email)
-    print(password)
+    
+    #If request sent by form
+    if not email and not password:
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+    #If request sent by JSON    
+    if not email and not password:
+        data = request.json
+        email = data['email']
+        password = data['password']
+
     if mongo.db.users.find_one({'email': email}):
         return {'error':'User already exist'}
     
@@ -26,12 +38,24 @@ def register():
         'password': hashed
     }
     mongo.db.users.insert_one(entry)
-    return {'status':'Registartion Success'}
+    return {'status':'Registration Success'}
 
 @app.route("/login",methods = ['POST','GET'])
 def login():
+    #If request sent by parameters/arguments.
     email = request.args.get('email')
     password = request.args.get('password')
+    
+    #If request sent by form
+    if not email and not password:
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+    #If request sent by JSON    
+    if not email and not password:
+        data = request.json
+        email = data['email']
+        password = data['password']
 
     if not mongo.db.users.find_one({'email':email}):
         return {'error':'User not found.'}
@@ -43,4 +67,4 @@ def login():
         return {'status':'You are logged-in.'}
     return {'error':'Password mismatched.'}
 
-app.run()
+app.run(debug=True)
